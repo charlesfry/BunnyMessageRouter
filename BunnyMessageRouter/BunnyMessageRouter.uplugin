@@ -1,0 +1,21 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Bunny Message Router",
+	"Description": "Gameplay-tag message bus between objects that don't know about each other, built to be debugged from the log.",
+	"Category": "Gameplay",
+	"CreatedBy": "Charles Fry",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": true,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{ "Name": "BunnyMessageRuntime", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "BunnyMessageNodes", "Type": "UncookedOnly", "LoadingPhase": "Default" }
+	]
+}
