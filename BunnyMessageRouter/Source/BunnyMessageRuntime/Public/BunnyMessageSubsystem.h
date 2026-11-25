@@ -19,7 +19,7 @@ enum class EBunnyMessageMatch : uint8
 {
 	// Listening on A.B receives A.B only.
 	ExactMatch,
-	// Listening on A.B receives A.B and A.B.C.
+	// Listening on A.B receives A and A.B and A.B.C tags.
 	PartialMatch
 };
 
@@ -86,24 +86,40 @@ public:
 	/** Calls Callback(Channel, Payload) for each broadcast on Channel while Owner lives. */
 	template <typename TPayload>
 	static FBunnyMessageListenerHandle Listen(const UObject* Owner, FGameplayTag Channel,
-		TFunction<void(FGameplayTag, const TPayload&)>&& Callback, EBunnyMessageMatch Match = EBunnyMessageMatch::ExactMatch)
+	                                          TFunction<void(FGameplayTag, const TPayload&)>&&
+	                                          Callback,
+	                                          EBunnyMessageMatch Match =
+		                                          EBunnyMessageMatch::ExactMatch)
 	{
 		return ListenInternal(Owner, Channel, TBaseStructure<TPayload>::Get(), Match,
-			[Callback = MoveTemp(Callback)](FGameplayTag Ch, const void* Payload) { Callback(Ch, *static_cast<const TPayload*>(Payload)); });
+		                      [Callback = MoveTemp(Callback)](FGameplayTag Ch, const void* Payload)
+		                      {
+			                      Callback(Ch, *static_cast<const TPayload*>(Payload));
+		                      });
 	}
 
 	/** Member-function form: Listen(this, Channel, &UMyThing::HandleX). */
 	template <typename TPayload, typename TOwner>
 	static FBunnyMessageListenerHandle Listen(TOwner* Owner, FGameplayTag Channel,
-		void (TOwner::*Function)(FGameplayTag, const TPayload&), EBunnyMessageMatch Match = EBunnyMessageMatch::ExactMatch)
+	                                          void (TOwner::*Function)(
+		                                          FGameplayTag, const TPayload&),
+	                                          EBunnyMessageMatch Match =
+		                                          EBunnyMessageMatch::ExactMatch)
 	{
 		// Owner is only dereferenced while alive: the subsystem checks before every call.
-		return Listen<TPayload>(Owner, Channel, [Owner, Function](FGameplayTag Ch, const TPayload& Payload) { (Owner->*Function)(Ch, Payload); }, Match);
+		return Listen<TPayload>(Owner, Channel,
+		                        [Owner, Function](FGameplayTag Ch, const TPayload& Payload)
+		                        {
+			                        (Owner->*Function)(Ch, Payload);
+		                        }, Match);
 	}
 
 	/** Calls Callback(Channel) for each broadcast on Channel, whatever its payload. */
-	static UE_API FBunnyMessageListenerHandle ListenForTag(const UObject* Owner, FGameplayTag Channel,
-		TFunction<void(FGameplayTag)>&& Callback, EBunnyMessageMatch Match = EBunnyMessageMatch::ExactMatch);
+	static UE_API FBunnyMessageListenerHandle ListenForTag(const UObject* Owner,
+	                                                       FGameplayTag Channel,
+	                                                       TFunction<void(FGameplayTag)>&& Callback,
+	                                                       EBunnyMessageMatch Match =
+		                                                       EBunnyMessageMatch::ExactMatch);
 
 	/** Removes every listener Owner registered. Call it in EndPlay. */
 	static UE_API void UnregisterAll(const UObject* Owner);
@@ -117,8 +133,11 @@ public:
 	UE_API virtual void Deinitialize() override;
 
 	/** Broadcasts Message on Channel. */
-	UFUNCTION(BlueprintCallable, CustomThunk, Category = Messaging, meta = (WorldContext = "Sender", CustomStructureParam = "Message", AllowAbstract = "false", DisplayName = "Broadcast Message"))
-	static UE_API void K2_BroadcastMessage(const UObject* Sender, FGameplayTag Channel, const int32& Message);
+	UFUNCTION(BlueprintCallable, CustomThunk, Category = Messaging,
+		meta = (WorldContext = "Sender", CustomStructureParam = "Message", AllowAbstract = "false",
+			DisplayName = "Broadcast Message"))
+	static UE_API void K2_BroadcastMessage(const UObject* Sender, FGameplayTag Channel,
+	                                       const int32& Message);
 	DECLARE_FUNCTION(execK2_BroadcastMessage);
 
 private:
@@ -139,8 +158,10 @@ private:
 		bool bRemoved = false;
 	};
 
-	static UE_API void BroadcastInternal(const UObject* Sender, FGameplayTag Channel, const UScriptStruct* Type, const void* Payload);
-	static UE_API FBunnyMessageListenerHandle ListenInternal(const UObject* Owner, FGameplayTag Channel, const UScriptStruct* Type,
+	static UE_API void BroadcastInternal(const UObject* Sender, FGameplayTag Channel,
+	                                     const UScriptStruct* Type, const void* Payload);
+	static UE_API FBunnyMessageListenerHandle ListenInternal(
+		const UObject* Owner, FGameplayTag Channel, const UScriptStruct* Type,
 		EBunnyMessageMatch Match, FCallback&& Callback);
 	void Remove(FGameplayTag Channel, int32 ID);
 
